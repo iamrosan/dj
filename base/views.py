@@ -1,7 +1,13 @@
 from django.shortcuts import render, redirect
-from .models import Room
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from .models import Room, Topic
 from .forms import RoomForm
+from django.db.models import Q
+# from django.conf import settings
 
+
+from django.contrib import messages
 
 
 # Create your views here.
@@ -14,10 +20,47 @@ from .forms import RoomForm
 #         ]
 # ----------------------------------
 
+def loginPage(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        # try:
+        #     user = User.objects.get(username=username)
+        # except:
+        #     messages.error(request, 'User not available')
+            
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect('index')
+        else:
+            messages.error(request,'Username or password is incorrect')
+            return redirect('login')
+
+    # context ={}
+    else:
+        return render(request, 'base/login_Register.html')
+
+def loogout(request):
+    logout(request)
+    return redirect('index')
+
 
 def index(request):
-    rooms = Room.objects.all #gets all the objects stored in our db
-    context = {'rooms':rooms}
+    q = request.GET.get('q') if request.GET.get('q') != None else ''
+    
+    # rooms = Room.objects.all #gets all the objects stored in our db
+    
+    rooms = Room.objects.filter(    #Search functionality wth of topic username and description
+        Q(topic__name__icontains= q) |
+        Q(name__icontains= q) |
+        Q(description__icontains= q) | 
+        Q(host__username__icontains= q) 
+        )
+    topics = Topic.objects.all
+    room_count = rooms.count()
+    context = {'rooms':rooms,'topics':topics,'room_count':room_count}
     return render(request,'base/index.html',context)
 
 def pricing(request):
@@ -34,7 +77,6 @@ def roomm(request,pk):
 
 
 def createRoom(request):
-    
     form = RoomForm()
     if request.method == 'POST':
         form = RoomForm(request.POST)
@@ -43,3 +85,26 @@ def createRoom(request):
             return redirect('index')
     context ={'form':form}
     return render(request,'base/createRoom.html',context)
+
+
+def updateRoom(request,pk):
+    room = Room.objects.get(id=pk)
+    form = RoomForm(instance = room)
+    if request.method == 'POST':
+        form = RoomForm(request.POST, instance = room)
+        if form.is_valid():
+            form.save()
+            return redirect('index')
+    context = {'form':form}
+    return render(request, 'base/update_room.html',context)
+
+
+
+def deleteRoom(request, pk):
+    room = Room.objects.get(id=pk)
+    if request.method == 'POST':
+        room.delete()
+        return redirect('index')
+    
+    context={'room':room}
+    return render(request, 'base/delete_Room.html', context)

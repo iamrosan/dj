@@ -26,7 +26,8 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',include('base.urls'))
+    # path('',include('django.contrib.auth.urls')),
+    path('',include('base.urls')),
     #<---------------paths for root templates--------------->
     
     # path('',views.indexpage),

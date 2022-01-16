@@ -1,0 +1,18 @@
+{% extends 'base/main.html' %}
+
+{% block content%}
+<h1 style='text-align: center;color:red;'>
+    login page
+</h1>
+
+<form method="POST" action=''>
+    {% csrf_token %}
+    <input type="text" name="username" id="">
+    <input type="password" name="password" id="">
+    <input type="submit" value="Login">
+</form>
+<h1>
+    {{error}}
+</h1>
+
+{% endblock content %}

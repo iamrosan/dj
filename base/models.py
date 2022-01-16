@@ -1,6 +1,6 @@
 from django.db import models
-from django.conf import settings
-
+# from django.conf import settings
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -11,7 +11,8 @@ class Topic(models.Model):
         return self.name
 
 class Room(models.Model):
-    host=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE, null=True)
+    # host=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE, null=True)
+    host=models.ForeignKey(User,on_delete=models.CASCADE, null=True)
     topic=models.ForeignKey(Topic, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
@@ -26,7 +27,8 @@ class Room(models.Model):
         ordering = ['-updated','-created'] #'-updated' for descending and 'updated' for ascending 
 
 class Message(models.Model):
-    user =models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
+    # user =models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
+    host=models.ForeignKey(User,on_delete=models.CASCADE, null=True)
     room =models.ForeignKey(Room, on_delete=models.CASCADE, null=True)
     body =models.TextField()
 
